@@ -157,6 +157,17 @@
 
     </div>
 
+    <!-- Full-screen photo lightbox: swipe or use arrow keys to move through a model's gallery -->
+    <div class="lightbox" id="photo-lightbox" hidden>
+      <button class="lightbox-close" aria-label="Close photo viewer">&times;</button>
+      <button class="lightbox-nav lightbox-prev" aria-label="Previous photo">&lsaquo;</button>
+      <div class="lightbox-stage">
+        <img src="" alt="">
+      </div>
+      <button class="lightbox-nav lightbox-next" aria-label="Next photo">&rsaquo;</button>
+      <div class="lightbox-counter"></div>
+    </div>
+
     <!-- Shared expand panel, relocated by JS to sit after the active card -->
     <div class="model-expand" id="model-expand-panel" hidden>
       <div class="model-expand-inner">

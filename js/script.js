@@ -73,12 +73,16 @@ document.addEventListener('DOMContentLoaded', function () {
   var seeMoreButtons = document.querySelectorAll('.btn-see-more');
   var activeButton = null;
   var hideTimeout = null;
+  var currentGallery = [];
+  var currentIndex = 0;
 
-  function setMainImage(src, thumbButtons) {
+  function setMainImage(index, srcs, thumbButtons) {
+    currentGallery = srcs;
+    currentIndex = index;
     var mainImg = expandPanel.querySelector('.model-expand-main-image img');
-    mainImg.src = src;
-    thumbButtons.forEach(function (btn) {
-      btn.classList.toggle('is-active', btn.dataset.src === src);
+    mainImg.src = srcs[index];
+    thumbButtons.forEach(function (btn, i) {
+      btn.classList.toggle('is-active', i === index);
     });
   }
 
@@ -116,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var thumbsWrap = expandPanel.querySelector('.model-expand-thumbs');
     thumbsWrap.innerHTML = '';
     var thumbButtons = [];
-    gallerySrcs.forEach(function (src) {
+    gallerySrcs.forEach(function (src, i) {
       var b = document.createElement('button');
       b.type = 'button';
       b.dataset.src = src;
@@ -124,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
       im.src = src;
       im.alt = name + ' detail photo';
       b.appendChild(im);
-      b.addEventListener('click', function () { setMainImage(src, thumbButtons); });
+      b.addEventListener('click', function () { setMainImage(i, gallerySrcs, thumbButtons); });
       thumbsWrap.appendChild(b);
       thumbButtons.push(b);
     });
-    setMainImage(gallerySrcs[0], thumbButtons);
+    setMainImage(0, gallerySrcs, thumbButtons);
 
     card.insertAdjacentElement('afterend', expandPanel);
     expandPanel.removeAttribute('hidden');
@@ -162,6 +166,101 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var closeBtn = expandPanel.querySelector('.model-expand-close');
     if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    var mainImageEl = expandPanel.querySelector('.model-expand-main-image img');
+    if (mainImageEl) {
+      mainImageEl.addEventListener('click', function () {
+        openLightbox(currentIndex);
+      });
+    }
+  }
+
+  /* ---------- Full-screen photo lightbox (swipe or arrow keys to move through a gallery) ---------- */
+  var lightbox = document.querySelector('#photo-lightbox');
+  var lightboxImg = lightbox ? lightbox.querySelector('img') : null;
+  var lightboxCounter = lightbox ? lightbox.querySelector('.lightbox-counter') : null;
+  var lightboxPrev = lightbox ? lightbox.querySelector('.lightbox-prev') : null;
+  var lightboxNext = lightbox ? lightbox.querySelector('.lightbox-next') : null;
+  var lightboxCloseBtn = lightbox ? lightbox.querySelector('.lightbox-close') : null;
+  var lightboxHideTimeout = null;
+
+  function showLightboxImage(index) {
+    if (!lightbox || !currentGallery.length) return;
+    currentIndex = ((index % currentGallery.length) + currentGallery.length) % currentGallery.length;
+    lightboxImg.src = currentGallery[currentIndex];
+    if (lightboxCounter) {
+      lightboxCounter.textContent = (currentIndex + 1) + ' / ' + currentGallery.length;
+    }
+    var multi = currentGallery.length > 1;
+    if (lightboxPrev) lightboxPrev.style.display = multi ? '' : 'none';
+    if (lightboxNext) lightboxNext.style.display = multi ? '' : 'none';
+    // keep the "See more" thumbnail row in sync with the lightbox position
+    var thumbs = expandPanel ? expandPanel.querySelectorAll('.model-expand-thumbs button') : [];
+    thumbs.forEach(function (btn, i) {
+      btn.classList.toggle('is-active', i === currentIndex);
+    });
+    var mainImg = expandPanel ? expandPanel.querySelector('.model-expand-main-image img') : null;
+    if (mainImg) mainImg.src = currentGallery[currentIndex];
+  }
+
+  function openLightbox(index) {
+    if (!lightbox) return;
+    showLightboxImage(index);
+    clearTimeout(lightboxHideTimeout);
+    lightbox.removeAttribute('hidden');
+    document.body.classList.add('nav-locked');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { lightbox.classList.add('is-open'); });
+    });
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('is-open');
+    document.body.classList.remove('nav-locked');
+    clearTimeout(lightboxHideTimeout);
+    lightboxHideTimeout = setTimeout(function () {
+      if (!lightbox.classList.contains('is-open')) lightbox.setAttribute('hidden', '');
+    }, 220);
+  }
+
+  if (lightbox) {
+    if (lightboxCloseBtn) lightboxCloseBtn.addEventListener('click', closeLightbox);
+    if (lightboxPrev) lightboxPrev.addEventListener('click', function () { showLightboxImage(currentIndex - 1); });
+    if (lightboxNext) lightboxNext.addEventListener('click', function () { showLightboxImage(currentIndex + 1); });
+
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    var lbTouchStartX = null;
+    var lbTouchStartY = null;
+
+    lightbox.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      lbTouchStartX = e.touches[0].clientX;
+      lbTouchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', function (e) {
+      if (lbTouchStartX === null) return;
+      var touch = e.changedTouches[0];
+      var dx = touch.clientX - lbTouchStartX;
+      var dy = touch.clientY - lbTouchStartY;
+      lbTouchStartX = null;
+      lbTouchStartY = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) showLightboxImage(currentIndex + 1);
+        else showLightboxImage(currentIndex - 1);
+      }
+    }, { passive: true });
+
+    document.addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showLightboxImage(currentIndex - 1);
+      if (e.key === 'ArrowRight') showLightboxImage(currentIndex + 1);
+    });
   }
 
 });
