@@ -268,4 +268,293 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  /* ---------- Price configurator: build your own price from the price sheet ---------- */
+  var PRICE_CONFIGS = {
+    '14': {
+      name: "Holland 14'",
+      base: {
+        title: 'Starting Boat',
+        items: [
+          { id: 'base-std', label: 'Standard finished boat', price: 10995, desc: 'White hull, foam cored bottom, three coosaboard seats w/ flotation, PVC guards, SS bow/transom eyes, 1" drain plug, non-skid & seat top paint, foam cored transom w/ coosaboard center, tiller steer setup.' },
+          { id: 'base-cc', label: 'Center console finished boat', price: 14790, desc: 'Standard foam cored console installed with steering and two hatches.' }
+        ]
+      },
+      groups: [
+        {
+          title: 'Options',
+          type: 'checkbox',
+          items: [
+            { id: 'opt-console', label: 'Standard foam cored console, steering & storage hatch', price: 3795 },
+            { id: 'opt-cc-seat', label: 'Center console w/ storage seat (add to center console boat)', price: 4510 },
+            { id: 'opt-bow-storage', label: 'Bow storage with drain', price: 920 },
+            { id: 'opt-cleats', label: 'Two spring cleats, reinforced mounting (add $50 per additional pair)', price: 330 },
+            { id: 'opt-boot-top', label: 'Boot top', price: 895 },
+            { id: 'opt-bottom-paint', label: 'Bottom paint', price: 995 },
+            { id: 'opt-breast-hook', label: 'Breast hook, standard 8" (add $150 for 11")', price: 700 },
+            { id: 'opt-spray-rails', label: "Spray rails, 8' PVC, 316 SS fasteners", price: 1040 },
+            { id: 'opt-nav-lights', label: 'Navigation lights (LED anchor + red/green side)', price: 620 },
+            { id: 'opt-bilge', label: 'Bilge pump', price: 400 },
+            { id: 'opt-color-gelcoat', label: 'Colored hull, molded gelcoat', price: 825 },
+            { id: 'opt-color-paint', label: 'Colored hull, painted (hand rolled & tipped)', price: 1850 }
+          ]
+        },
+        {
+          title: 'Suzuki Outboard',
+          type: 'radio',
+          allowNone: true,
+          noneLabel: 'No outboard',
+          items: [
+            { id: 'ob-25-tb', label: '25 HP — Tiller, Black', price: 6339 },
+            { id: 'ob-25-tw', label: '25 HP — Tiller, White', price: 6519 },
+            { id: 'ob-25-rb', label: '25 HP — Remote, Black', price: 6249 },
+            { id: 'ob-25-rw', label: '25 HP — Remote, White', price: 6429 },
+            { id: 'ob-30-tb', label: '30 HP — Tiller, Black', price: 7349 },
+            { id: 'ob-30-tw', label: '30 HP — Tiller, White', price: 7529 },
+            { id: 'ob-30-rb', label: '30 HP — Remote, Black', price: 7219 },
+            { id: 'ob-30-rw', label: '30 HP — Remote, White', price: 7399 },
+            { id: 'ob-40-tb', label: '40 HP — Tiller, Black', price: 8336 },
+            { id: 'ob-40-tw', label: '40 HP — Tiller, White', price: 8687 },
+            { id: 'ob-40-rb', label: '40 HP — Remote, Black', price: 7938 },
+            { id: 'ob-40-rw', label: '40 HP — Remote, White', price: 8289 }
+          ]
+        },
+        {
+          title: 'Outboard Installation',
+          type: 'radio',
+          allowNone: true,
+          noneLabel: 'No installation needed',
+          items: [
+            { id: 'inst-tiller', label: 'Tiller installation & mounting (battery, fuel system, wiring, sea trial)', price: 780 },
+            { id: 'inst-remote', label: 'Remote steer installation & mounting (battery, fuel system, wiring, throttle, steering, sea trial)', price: 990 }
+          ]
+        }
+      ]
+    },
+    '32': {
+      name: "Holland 32'",
+      base: {
+        title: 'Build Stage',
+        items: [
+          { id: 'tier-finished', label: 'Finished Boat, Less Engine', price: 284000, desc: "Fully finished hull and deck, mechanical systems installed, standard colors — see the full breakdown above for everything included." },
+          { id: 'tier-assembled', label: 'Assembled Kit — Less Running Gear', price: 80550, desc: 'Complete deck unit kit assembled on hull — seams glassed, blended, trimmed, surface prepped.' },
+          { id: 'tier-parts', label: 'Complete Kit, Parts Only (Unassembled)', price: 62625, desc: 'Hull, deck unit, windshield, port side panel, knee piece, shelter top — parts only.' },
+          { id: 'tier-hull', label: 'Bare Hull Only', price: 33675, desc: 'Solid fiberglass hull (white), four stringers, molded quarter guards, molded skeg, sheer flange, trimmed.' }
+        ]
+      }
+    },
+    '38': {
+      name: "Holland 38'",
+      base: {
+        title: 'Build Stage',
+        items: [
+          { id: 'tier-finished', label: "Finished Boat, Less Engine (21' Cockpit)", price: 379000, desc: "Fully finished hull and deck, mechanical systems installed, standard colors — see the full breakdown above for everything included." },
+          { id: 'tier-assembled-21', label: "Assembled Kit, 21' Cockpit", price: 136300, desc: 'Complete kit, solid glass hull, deck unit — seams glassed/blended, surface prepped.' },
+          { id: 'tier-assembled-23', label: "Assembled Kit, 23' Cockpit", price: 140360, desc: 'Complete kit; windshield narrowed, bulkhead pushed forward.' },
+          { id: 'tier-hull', label: 'Bare Hull Only', price: 59920, desc: 'Solid fiberglass hull (white), four stringers, molded quarter guards, molded skeg, sheer flange, trimmed.' }
+        ]
+      }
+    }
+  };
+
+  var priceConfigButtons = document.querySelectorAll('.btn-price-config');
+  var priceModal = document.querySelector('#price-config-modal');
+
+  if (priceModal && priceConfigButtons.length) {
+    var pcTitle = priceModal.querySelector('[data-config-title]');
+    var pcSub = priceModal.querySelector('[data-config-sub]');
+    var pcBody = priceModal.querySelector('[data-config-body]');
+    var pcTotal = priceModal.querySelector('[data-config-total]');
+    var pcName = priceModal.querySelector('[data-config-name]');
+    var pcNotes = priceModal.querySelector('[data-config-notes]');
+    var pcError = priceModal.querySelector('[data-config-error]');
+    var pcSaveBtn = priceModal.querySelector('[data-config-save]');
+    var pcSendBtn = priceModal.querySelector('[data-config-send]');
+    var pcCloseBtn = priceModal.querySelector('.price-config-close');
+    var pcHideTimeout = null;
+    var currentConfig = null;
+
+    function formatMoney(n) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function renderOption(item, inputType, groupName, checked) {
+      var wrap = document.createElement('label');
+      wrap.className = 'price-config-option';
+      var input = document.createElement('input');
+      input.type = inputType;
+      if (groupName) input.name = groupName;
+      input.dataset.id = item.id;
+      input.dataset.price = item.price;
+      if (checked) input.checked = true;
+      var labelWrap = document.createElement('span');
+      labelWrap.className = 'opt-label';
+      var nameEl = document.createElement('span');
+      nameEl.className = 'opt-name';
+      nameEl.textContent = item.label;
+      labelWrap.appendChild(nameEl);
+      if (item.desc) {
+        var descEl = document.createElement('span');
+        descEl.className = 'opt-desc';
+        descEl.textContent = item.desc;
+        labelWrap.appendChild(descEl);
+      }
+      var priceEl = document.createElement('span');
+      priceEl.className = 'opt-price';
+      priceEl.textContent = item.price ? formatMoney(item.price) : 'Included';
+      wrap.appendChild(input);
+      wrap.appendChild(labelWrap);
+      wrap.appendChild(priceEl);
+      input.addEventListener('change', updateTotal);
+      return wrap;
+    }
+
+    function renderGroup(title, type, items, groupName, allowNone, noneLabel) {
+      var section = document.createElement('div');
+      section.className = 'price-config-group';
+      var h4 = document.createElement('h4');
+      h4.textContent = title;
+      section.appendChild(h4);
+      if (type === 'radio' && allowNone) {
+        var noneItem = { id: groupName + '-none', label: noneLabel || 'None', price: 0 };
+        section.appendChild(renderOption(noneItem, 'radio', groupName, true));
+      }
+      items.forEach(function (item, i) {
+        var checked = type === 'radio' && !allowNone && i === 0;
+        section.appendChild(renderOption(item, type, groupName, checked));
+      });
+      return section;
+    }
+
+    function updateTotal() {
+      var total = 0;
+      pcBody.querySelectorAll('input:checked').forEach(function (input) {
+        total += Number(input.dataset.price) || 0;
+      });
+      pcTotal.textContent = formatMoney(total);
+    }
+
+    function collectSelections() {
+      var lines = [];
+      pcBody.querySelectorAll('input:checked').forEach(function (input) {
+        var price = Number(input.dataset.price) || 0;
+        var optionEl = input.closest('.price-config-option');
+        var nameEl = optionEl ? optionEl.querySelector('.opt-name') : null;
+        var label = nameEl ? nameEl.textContent : input.dataset.id;
+        if (price > 0) lines.push({ label: label, price: price });
+      });
+      return lines;
+    }
+
+    function openPriceConfig(modelId) {
+      currentConfig = PRICE_CONFIGS[modelId];
+      if (!currentConfig) return;
+      pcTitle.textContent = 'Build Your ' + currentConfig.name + ' Price';
+      pcSub.textContent = currentConfig.groups
+        ? 'Pick a starting boat, then add the options you want.'
+        : 'Pick the build stage you want priced.';
+      pcBody.innerHTML = '';
+      pcBody.appendChild(renderGroup(currentConfig.base.title, 'radio', currentConfig.base.items, 'price-base', false));
+      if (currentConfig.groups) {
+        currentConfig.groups.forEach(function (group) {
+          var groupName = 'price-group-' + group.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+          pcBody.appendChild(renderGroup(group.title, group.type, group.items, groupName, group.allowNone, group.noneLabel));
+        });
+      }
+      pcName.value = '';
+      pcNotes.value = '';
+      pcError.setAttribute('hidden', '');
+      updateTotal();
+
+      clearTimeout(pcHideTimeout);
+      priceModal.removeAttribute('hidden');
+      document.body.classList.add('nav-locked');
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { priceModal.classList.add('is-open'); });
+      });
+    }
+
+    function closePriceConfig() {
+      priceModal.classList.remove('is-open');
+      document.body.classList.remove('nav-locked');
+      clearTimeout(pcHideTimeout);
+      pcHideTimeout = setTimeout(function () {
+        if (!priceModal.classList.contains('is-open')) priceModal.setAttribute('hidden', '');
+      }, 220);
+    }
+
+    function buildSummaryText() {
+      var lines = collectSelections();
+      var total = 0;
+      lines.forEach(function (l) { total += l.price; });
+      var name = pcName.value.trim() || 'Not provided';
+      var notes = pcNotes.value.trim();
+      var text = "Holland's Boat Shop — Price Estimate\n";
+      text += currentConfig.name + '\n';
+      text += 'Date: ' + new Date().toLocaleDateString('en-US') + '\n';
+      text += 'Customer: ' + name + '\n\n';
+      text += 'Selections:\n';
+      lines.forEach(function (l) {
+        text += '  - ' + l.label + ': ' + formatMoney(l.price) + '\n';
+      });
+      text += '\nEstimated total: ' + formatMoney(total) + '\n';
+      if (notes) text += '\nCustomer notes:\n' + notes + '\n';
+      text += '\nThis is an estimate built from the current price sheet. Final pricing is confirmed by the shop before any order.\n';
+      return text;
+    }
+
+    function validatePcName() {
+      if (!pcName.value.trim()) {
+        pcError.removeAttribute('hidden');
+        pcName.focus();
+        return false;
+      }
+      pcError.setAttribute('hidden', '');
+      return true;
+    }
+
+    if (pcSaveBtn) {
+      pcSaveBtn.addEventListener('click', function () {
+        if (!validatePcName()) return;
+        var text = buildSummaryText();
+        var blob = new Blob([text], { type: 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var modelSlug = currentConfig.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        a.href = url;
+        a.download = modelSlug + '-price-estimate.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      });
+    }
+
+    if (pcSendBtn) {
+      pcSendBtn.addEventListener('click', function () {
+        if (!validatePcName()) return;
+        var text = buildSummaryText();
+        var subject = 'Price estimate request — ' + currentConfig.name;
+        var mailto = 'mailto:hollandsboatshopinc@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(text);
+        window.location.href = mailto;
+      });
+    }
+
+    priceConfigButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        openPriceConfig(button.dataset.priceModel);
+      });
+    });
+
+    if (pcCloseBtn) pcCloseBtn.addEventListener('click', closePriceConfig);
+
+    priceModal.addEventListener('click', function (e) {
+      if (e.target === priceModal) closePriceConfig();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (!priceModal.classList.contains('is-open')) return;
+      if (e.key === 'Escape') closePriceConfig();
+    });
+  }
+
 });

@@ -129,6 +129,7 @@
           </div>
         </details>
         <p class="price-note">Source: Holland Boat 14' Price Sheet, Holland's Boat Shop Inc., 2026.</p>
+        <button type="button" class="btn btn-primary btn-price-config" data-price-model="14">Price with your own options</button>
       </div>
     </div>
 
@@ -201,6 +202,7 @@
           </div>
         </details>
         <p class="price-note">Source: Holland Boat 32' Price Sheet, Holland's Boat Shop Inc., 2026.</p>
+        <button type="button" class="btn btn-primary btn-price-config" data-price-model="32">Price with your own options</button>
       </div>
     </div>
 
@@ -271,6 +273,7 @@
           </div>
         </details>
         <p class="price-note">Source: Holland Boat 38' Price Sheet, Holland's Boat Shop Inc., 2026.</p>
+        <button type="button" class="btn btn-primary btn-price-config" data-price-model="38">Price with your own options</button>
       </div>
     </div>
 
@@ -297,6 +300,35 @@
         <h3>Holland 20'</h3>
         <p>The newest hull in the lineup, built to fill the gap between the 14' and the 32' — a smaller boat with the same Holland construction.</p>
         <p class="price-note">No price sheet is on file for the Holland 20' yet — call or email the shop for current pricing.</p>
+      </div>
+    </div>
+
+    <!-- Price configurator: build your own price from the shop's price sheet -->
+    <div class="price-config" id="price-config-modal" hidden>
+      <div class="price-config-panel">
+        <button class="price-config-close" aria-label="Close price builder">&times;</button>
+        <div class="price-config-head">
+          <span class="eyebrow">Build Your Price</span>
+          <h3 data-config-title></h3>
+          <p class="price-config-sub" data-config-sub></p>
+        </div>
+        <div class="price-config-body" data-config-body></div>
+        <div class="price-config-total">
+          <span>Estimated total</span>
+          <strong data-config-total>$0</strong>
+        </div>
+        <p class="price-note">This is an estimate built from our current price sheet — final pricing is confirmed by the shop before any order.</p>
+        <div class="price-config-customer">
+          <label for="price-config-name">Your name</label>
+          <input type="text" id="price-config-name" data-config-name placeholder="Full name">
+          <label for="price-config-notes">Notes for the shop</label>
+          <textarea id="price-config-notes" data-config-notes rows="3" placeholder="Timeline, color preferences, questions, etc."></textarea>
+          <p class="price-config-error" data-config-error hidden>Please enter your name before saving or sending.</p>
+        </div>
+        <div class="price-config-actions">
+          <button type="button" class="btn btn-outline-dark" data-config-save>Save summary</button>
+          <button type="button" class="btn btn-primary" data-config-send>Email to the shop</button>
+        </div>
       </div>
     </div>
 
