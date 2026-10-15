@@ -425,6 +425,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--teal); outline-
 .model-row{
   display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:start;
   padding:52px 0; border-bottom:1px solid var(--line);
+  scroll-margin-top:calc(var(--header-h) + 16px);
 }
 .model-row:last-of-type{ border-bottom:none; }
 .model-row:nth-of-type(even) .model-row-media{ order:2; }

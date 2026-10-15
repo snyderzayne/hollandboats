@@ -117,6 +117,11 @@ document.addEventListener('DOMContentLoaded', function () {
     expandPanel.querySelector('[data-expand-desc]').innerHTML = desc;
     expandPanel.querySelector('[data-expand-specs]').innerHTML = specs;
 
+    var pricingLink = expandPanel.querySelector('[data-expand-pricing-link]');
+    if (pricingLink) {
+      pricingLink.href = card.id ? 'models.html#' + card.id : 'models.html';
+    }
+
     var thumbsWrap = expandPanel.querySelector('.model-expand-thumbs');
     thumbsWrap.innerHTML = '';
     var thumbButtons = [];
