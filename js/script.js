@@ -512,20 +512,161 @@ document.addEventListener('DOMContentLoaded', function () {
       return true;
     }
 
+    function loadLogoImage() {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () { resolve(img); };
+        img.onerror = function () { resolve(null); };
+        img.src = 'assets/holland-icon-mark.png';
+      });
+    }
+
+    function buildSummaryPdf(logoImg) {
+      var jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+      if (!jsPDFCtor) return null;
+
+      var lines = collectSelections();
+      var total = 0;
+      lines.forEach(function (l) { total += l.price; });
+      var name = pcName.value.trim() || 'Not provided';
+      var notes = pcNotes.value.trim();
+
+      var doc = new jsPDFCtor({ unit: 'pt', format: 'letter' });
+      var pageWidth = doc.internal.pageSize.getWidth();
+      var pageHeight = doc.internal.pageSize.getHeight();
+      var margin = 56;
+      var y = 56;
+
+      function ensureSpace(nextLineHeight) {
+        if (y + nextLineHeight > pageHeight - margin) {
+          doc.addPage();
+          y = 56;
+        }
+      }
+
+      // --- Header: Holland logo mark, then "Holland's Boat Shop" below it ---
+      if (logoImg) {
+        var logoSize = 54;
+        doc.addImage(logoImg, 'PNG', (pageWidth - logoSize) / 2, y, logoSize, logoSize);
+        y += logoSize + 12;
+      }
+      doc.setFont('times', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(10, 29, 48);
+      doc.text("Holland's Boat Shop", pageWidth / 2, y, { align: 'center' });
+      y += 16;
+      doc.setDrawColor(224, 216, 198);
+      doc.setLineWidth(1);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 28;
+
+      // --- Estimate details ---
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(27, 36, 48);
+      doc.text(currentConfig.name + ' — Price Estimate', margin, y);
+      y += 22;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(91, 100, 114);
+      doc.text('Date: ' + new Date().toLocaleDateString('en-US'), margin, y);
+      y += 16;
+      doc.text('Customer: ' + name, margin, y);
+      y += 26;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(47, 111, 98);
+      doc.text('SELECTIONS', margin, y);
+      y += 16;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(27, 36, 48);
+      lines.forEach(function (l) {
+        ensureSpace(18);
+        var priceText = formatMoney(l.price);
+        var labelMaxWidth = pageWidth - margin * 2 - 70;
+        var wrapped = doc.splitTextToSize(l.label, labelMaxWidth);
+        wrapped.forEach(function (row, i) {
+          ensureSpace(16);
+          doc.text(row, margin + 10, y);
+          if (i === 0) doc.text(priceText, pageWidth - margin, y, { align: 'right' });
+          y += 15;
+        });
+      });
+
+      y += 8;
+      ensureSpace(34);
+      doc.setDrawColor(224, 216, 198);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 24;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(10, 29, 48);
+      doc.text('Estimated total', margin, y);
+      doc.text(formatMoney(total), pageWidth - margin, y, { align: 'right' });
+      y += 30;
+
+      if (notes) {
+        ensureSpace(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(47, 111, 98);
+        doc.text('CUSTOMER NOTES', margin, y);
+        y += 16;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.setTextColor(27, 36, 48);
+        var noteLines = doc.splitTextToSize(notes, pageWidth - margin * 2);
+        noteLines.forEach(function (row) {
+          ensureSpace(15);
+          doc.text(row, margin, y);
+          y += 15;
+        });
+        y += 14;
+      }
+
+      ensureSpace(30);
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(9);
+      doc.setTextColor(139, 147, 160);
+      var disclaimer = doc.splitTextToSize(
+        'This is an estimate built from the current price sheet. Final pricing is confirmed by the shop before any order.',
+        pageWidth - margin * 2
+      );
+      disclaimer.forEach(function (row) {
+        ensureSpace(13);
+        doc.text(row, margin, y);
+        y += 13;
+      });
+
+      return doc;
+    }
+
     if (pcSaveBtn) {
       pcSaveBtn.addEventListener('click', function () {
         if (!validatePcName()) return;
-        var text = buildSummaryText();
-        var blob = new Blob([text], { type: 'text/plain' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        var modelSlug = currentConfig.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        a.href = url;
-        a.download = modelSlug + '-price-estimate.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        loadLogoImage().then(function (logoImg) {
+          var doc = buildSummaryPdf(logoImg);
+          var modelSlug = currentConfig.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          if (doc) {
+            doc.save(modelSlug + '-price-estimate.pdf');
+          } else {
+            // Fallback if the PDF library didn't load: download a plain-text summary instead
+            var text = buildSummaryText();
+            var blob = new Blob([text], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = modelSlug + '-price-estimate.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+          }
+        });
       });
     }
 
