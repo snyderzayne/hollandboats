@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---------- Price configurator: build your own price from the price sheet ---------- */
   var PRICE_CONFIGS = {
     '14': {
-      name: "Holland 14'",
+      name: "Holland 14",
       base: {
         title: 'Starting Boat',
         items: [
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ]
     },
     '32': {
-      name: "Holland 32'",
+      name: "Holland 32",
       base: {
         title: 'Build Stage',
         items: [
@@ -343,13 +343,13 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     },
     '38': {
-      name: "Holland 38'",
+      name: "Holland 38",
       base: {
         title: 'Build Stage',
         items: [
-          { id: 'tier-finished', label: "Finished Boat, Less Engine (21' Cockpit)", price: 379000, desc: "Fully finished hull and deck, mechanical systems installed, standard colors — see the full breakdown above for everything included." },
-          { id: 'tier-assembled-21', label: "Assembled Kit, 21' Cockpit", price: 136300, desc: 'Complete kit, solid glass hull, deck unit — seams glassed/blended, surface prepped.' },
-          { id: 'tier-assembled-23', label: "Assembled Kit, 23' Cockpit", price: 140360, desc: 'Complete kit; windshield narrowed, bulkhead pushed forward.' },
+          { id: 'tier-finished', label: "Finished Boat, Less Engine (21 Cockpit)", price: 379000, desc: "Fully finished hull and deck, mechanical systems installed, standard colors — see the full breakdown above for everything included." },
+          { id: 'tier-assembled-21', label: "Assembled Kit, 21 Cockpit", price: 136300, desc: 'Complete kit, solid glass hull, deck unit — seams glassed/blended, surface prepped.' },
+          { id: 'tier-assembled-23', label: "Assembled Kit, 23 Cockpit", price: 140360, desc: 'Complete kit; windshield narrowed, bulkhead pushed forward.' },
           { id: 'tier-hull', label: 'Bare Hull Only', price: 59920, desc: 'Solid fiberglass hull (white), four stringers, molded quarter guards, molded skeg, sheer flange, trimmed.' }
         ]
       }
