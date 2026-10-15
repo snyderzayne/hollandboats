@@ -52,7 +52,7 @@
       </div>
       <div class="model-row-body">
         <span class="tag">Outboard Skiff</span>
-        <h3>Holland 14'</h3>
+        <h3 class="model-title">Holland 14'</h3>
         <p>A tiller-steer or center-console utility skiff, foam-cored and finished bow to transom.</p>
 
         <div class="table-scroll">
@@ -140,7 +140,7 @@
       </div>
       <div class="model-row-body">
         <span class="tag">Downeast Cruiser</span>
-        <h3>Holland 32'</h3>
+        <h3 class="model-title">Holland 32'</h3>
         <p>Solid-glass downeast hull, available as a bare hull, kit, or finished boat less engine.</p>
 
         <div class="price-headline">
@@ -213,7 +213,7 @@
       </div>
       <div class="model-row-body">
         <span class="tag">Flagship</span>
-        <h3>Holland 38'</h3>
+        <h3 class="model-title">Holland 38'</h3>
         <p>Our largest hull — a 21' or 23' cockpit lobster yacht, available as a kit or finished boat less engine.</p>
 
         <div class="price-headline">
@@ -284,7 +284,7 @@
       </div>
       <div class="model-row-body">
         <span class="tag">Classic Rowing Hull</span>
-        <h3>Holland Pea Pod</h3>
+        <h3 class="model-title">Holland Pea Pod</h3>
         <p>A traditional double-ended rowing peapod, built the old way for owners who'd rather pull oars than run an outboard.</p>
         <p class="price-note">No price sheet is on file for the Pea Pod yet — call or email the shop for current pricing.</p>
       </div>
@@ -297,7 +297,7 @@
       </div>
       <div class="model-row-body">
         <span class="tag">Newest Model</span>
-        <h3>Holland 20'</h3>
+        <h3 class="model-title">Holland 20'</h3>
         <p>The newest hull in the lineup, built to fill the gap between the 14' and the 32' — a smaller boat with the same Holland construction.</p>
         <p class="price-note">No price sheet is on file for the Holland 20' yet — call or email the shop for current pricing.</p>
       </div>
@@ -326,7 +326,7 @@
           <p class="price-config-error" data-config-error hidden>Please enter your name before saving or sending.</p>
         </div>
         <div class="price-config-actions">
-          <button type="button" class="btn btn-outline-dark" data-config-save>Save summary</button>
+          <button type="button" class="btn btn-outline-dark" data-config-save>Save as PDF</button>
           <button type="button" class="btn btn-primary" data-config-send>Email to the shop</button>
         </div>
       </div>
@@ -384,7 +384,26 @@
   </div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<!-- Printable summary: populated by JS, shown only when "Save as PDF" triggers the browser's print dialog. Kept as a direct child of <body> so the print stylesheet can hide every other top-level section cleanly. -->
+<div class="price-config-print" id="price-config-print">
+  <div class="print-header">
+    <img src="assets/holland-icon-mark.png" alt="" class="print-logo">
+    <h1>Holland's Boat Shop</h1>
+  </div>
+  <h2 data-print-model></h2>
+  <p class="print-meta" data-print-meta></p>
+  <table class="print-table" data-print-table></table>
+  <div class="print-total">
+    <span>Estimated total</span>
+    <strong data-print-total></strong>
+  </div>
+  <div class="print-notes" data-print-notes hidden>
+    <h3>Customer Notes</h3>
+    <p data-print-notes-text></p>
+  </div>
+  <p class="print-disclaimer">This is an estimate built from our current price sheet. Final pricing is confirmed by the shop before any order.</p>
+</div>
+
 <script src="js/script.js"></script>
 </body>
 </html>

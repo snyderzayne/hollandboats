@@ -51,6 +51,14 @@ h1,h2,h3,h4{
 h1{ font-size:clamp(2.2rem, 4.5vw, 3.6rem); font-weight:600; }
 h2{ font-size:clamp(1.7rem, 3vw, 2.5rem); }
 h3{ font-size:1.3rem; }
+
+/* Model names (boat designations like "Holland 32'") get their own distinct treatment */
+.model-title{
+  font-family:'Times New Roman', Times, 'Liberation Serif', serif;
+  font-weight:700;
+  font-style:italic;
+  text-transform:uppercase;
+}
 p{ margin:0 0 16px; color:var(--ink-500); }
 .container{ max-width:var(--maxw); margin:0 auto; padding:0 24px; }
 section{ padding:88px 0; }
@@ -544,6 +552,34 @@ details.price-breakdown .breakdown-body p{ font-size:0.88rem; margin:0; }
 @media (max-width:620px){
   .price-config-panel{ padding:24px 18px; }
   .price-config-actions{ flex-direction:column; }
+}
+
+/* ===== Printable price summary (shown only via window.print()) ===== */
+.price-config-print{ display:none; }
+@media print{
+  body > *:not(#price-config-print){ display:none !important; }
+  .price-config-print{
+    display:block !important; width:100%;
+    padding:50px 60px; background:#fff;
+  }
+  .price-config-print .print-header{ text-align:center; margin-bottom:28px; }
+  .price-config-print .print-logo{ width:70px; height:70px; display:block; margin:0 auto 10px; }
+  .price-config-print h1{ font-family:'Fraunces', serif; font-size:1.7rem; color:var(--navy-900); margin:0; }
+  .price-config-print h2{ font-family:'Fraunces', serif; font-size:1.25rem; color:var(--ink); margin:0 0 4px; }
+  .price-config-print .print-meta{ font-size:0.85rem; color:var(--ink-500); margin:0 0 24px; }
+  .price-config-print .print-table{ width:100%; border-collapse:collapse; margin-bottom:18px; }
+  .price-config-print .print-table td{ padding:7px 0; border-bottom:1px solid var(--line); font-size:0.92rem; color:var(--ink); }
+  .price-config-print .print-table td:last-child{ text-align:right; font-weight:700; white-space:nowrap; padding-left:16px; color:var(--navy-800); }
+  .price-config-print .print-total{
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:2px solid var(--navy-900); padding-top:12px; margin-bottom:24px;
+  }
+  .price-config-print .print-total span{ font-weight:600; color:var(--navy-800); }
+  .price-config-print .print-total strong{ font-family:'Fraunces', serif; font-size:1.4rem; color:var(--navy-900); }
+  .price-config-print .print-notes{ margin-bottom:24px; }
+  .price-config-print .print-notes h3{ font-family:'Inter',sans-serif; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--teal); margin:0 0 6px; }
+  .price-config-print .print-notes p{ font-size:0.9rem; color:var(--ink); white-space:pre-wrap; margin:0; }
+  .price-config-print .print-disclaimer{ font-size:0.78rem; color:var(--ink-300); font-style:italic; margin:0; }
 }
 
 /* ===== For Sale ===== */
